@@ -4,4 +4,6 @@ Welcome to my personal repository for the CS50 AI course! Here, I will maintain 
 
 This repository contains projects, exercises, and any additional materials related to the CS50 AI course. Feel free to explore the content and follow along with my progress as I work through the course materials.
 
+**This is Project 0 - degrees**
+
 **Thank you for visiting! 🚀**
