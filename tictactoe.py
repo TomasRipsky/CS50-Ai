@@ -62,6 +62,10 @@ def result(board, action):
     # Extract the row and column indices from the action
     i, j = action
 
+    # Ensure that the action is within the bounds of the board
+    if i < 0 or i > 2 or j < 0 or j > 2:
+        raise Exception("Out-of-bounds move")
+    
     # Ensure that the action is valid
     if new_board[i][j] is not EMPTY:
         raise Exception("Invalid action")
@@ -133,13 +137,17 @@ def utility(board):
 
 def minimax(board):
     """
-    Returns the optimal action for the current player on the board using alpha-beta pruning.
+    Returns the optimal action for the current player on the board.
     """
+    # Check if the game is over
+    if terminal(board):
+        return None
+
     # Define the maximizing and minimizing players
     maximizing_player = X
     minimizing_player = O
 
-    # Define the recursive helper function to perform minimax search with alpha-beta pruning
+    # Define the recursive helper function to perform minimax search
     def min_value(board, alpha, beta):
         if terminal(board):
             return utility(board)
