@@ -176,97 +176,70 @@ class MinesweeperAI():
             sentence.mark_safe(cell)
 
     def add_knowledge(self, cell, count):
-        """
-        Called when the Minesweeper board tells us, for a given
-        safe cell, how many neighboring cells have mines in them.
+            """
+            Called when the Minesweeper board tells us, for a given
+            safe cell, how many neighboring cells have mines in them.
 
-        This function should:
-            1) mark the cell as a move that has been made
-            2) mark the cell as safe
-            3) add a new sentence to the AI's knowledge base
-               based on the value of `cell` and `count`
-            4) mark any additional cells as safe or as mines
-               if it can be concluded based on the AI's knowledge base
-            5) add any new sentences to the AI's knowledge base
-               if they can be inferred from existing knowledge
-        """
-        # Step 1 Mark the cell as moved
-        self.moves_made.add(cell)
+            This function should:
+                1) mark the cell as a move that has been made
+                2) mark the cell as safe
+                3) add a new sentence to the AI's knowledge base
+                based on the value of `cell` and `count`
+                4) mark any additional cells as safe or as mines
+                if it can be concluded based on the AI's knowledge base
+                5) add any new sentences to the AI's knowledge base
+                if they can be inferred from existing knowledge
+            """
+            # Step 1: Mark the cell as moved
+            self.moves_made.add(cell)
 
-        # Step 2 Mark the cell as a safe cell
-        self.mark_safe(cell)
+            # Step 2: Mark the cell as safe
+            self.mark_safe(cell)
 
-        # Step 3 add new knowledge to the AI
-        i, j = cell
-        # First let go through each cell
-        new_knowledge = []
-        neighbors = set()
-        # We search in each row and column but taking into account the limits. -> Remember superior limit not included
-        for x in range(max(0, i - 1), min(self.height, i + 2)):
-            for y in range(max(0, j - 1), min(self.width, j + 2)):
-                # We create our neighbor
-                neighbor = (x, y)
-                # we check if it is not the same cell that we are analyzing 
-                # if it is not already moved
-                # and that it is not already marked as a mine
-                if neighbor != cell and neighbor not in self.moves_made and neighbor not in self.mines:
-                    # We add the neighbor to the list
-                    neighbors.add(neighbor)
-                # When excluding a known mine cell, decrease the count by 1
-                elif neighbor in self.mines:
-                    count -= 1
-                # We create a sentence and add it the the AI knoledge base
+            # Step 3: Add new knowledge to the AI
+            i, j = cell
+            new_knowledge = []
+            neighbors = set()
+            # Iterate over neighboring cells
+            for x in range(max(0, i - 1), min(self.height, i + 2)):
+                for y in range(max(0, j - 1), min(self.width, j + 2)):
+                    # Add to the cell collection if the cell is not yet explored
+                    # and is not the mine already known
+                    if (x, y) != cell and (x, y) not in self.moves_made and (x, y) not in self.mines:
+                        neighbors.add((x, y))
+                    # When excluding a known mine cell, decrease the count by 1
+                    elif (x, y) in self.mines:
+                        count -= 1
+            # Add new sentence to the knowledge base if neighbors are valid and their count is not 0
+            if neighbors and count > 0:
                 self.knowledge.append(Sentence(neighbors, count))
 
-        # Step 4 mark additional cells
-        # We go through all the sentences in our knowledge base
-        for sentence in self.knowledge:
-            known_safes = sentence.known_safes()
-            if known_safes:
-                for cell in known_safes.copy():
-                    self.mark_safe(cell)
-            known_mines = sentence.known_mines()
-            if known_mines:
-                for cell in known_mines.copy():
-                    self.mark_mine(cell)
+            # Step 4: Mark additional cells
+            for sentence in self.knowledge:
+                known_safes = sentence.known_safes()
+                if known_safes:
+                    for cell in known_safes.copy():
+                        self.mark_safe(cell)
+                known_mines = sentence.known_mines()
+                if known_mines:
+                    for cell in known_mines.copy():
+                        self.mark_mine(cell)
 
-            # We store all the mines known for that sentences and all the safe ones too
-            known_mines = sentence.known_mines()
-            known_safes = sentence.known_safes()
-            """
-            #We add the known mines and safes to the new ones
-            # (Here we use the |= operator that is used to perform an union of sets. 
-            # It adds all elements of the right-hand side set to the left-hand side set, 
-            # but without duplicating elements.)
-            if known_mines:
-                self.mines |= known_mines
-            if known_safes:
-                self.safes |= known_safes
-            """
-            
-        # Step 5 we will try to infer new knowledge
-        # We go through each sentence in our agent knowledge
-        for sentence in self.knowledge:
-            if not sentence.cells:
-                continue           
-            # If our sentence count is 0 it means that all the cells in that sentence are safe
-            # So we mark them as safe
-            if sentence.count == 0:
-                for cell in sentence.cells.copy():
-                    self.mark_safe(cell)
-            # If not but the amount of cells is equal to the count then we know that all of them are mines
-            # So we mark them as mines
-            elif len(sentence.cells) == sentence.count:
-                for cell in sentence.cells.copy():
-                    self.mark_mine(cell)
-            # If neither inference can be made we store the sentence as it is
-            else:
-                new_knowledge.append(sentence)
-        # We replace the agent knowledge with this new knowledge
-        self.knowledge = new_knowledge
+            # Step 5: Infer new knowledge
+            for sentence in self.knowledge:
+                if not sentence.cells:
+                    continue
+                if sentence.count == 0:
+                    for cell in sentence.cells.copy():
+                        self.mark_safe(cell)
+                elif len(sentence.cells) == sentence.count:
+                    for cell in sentence.cells.copy():
+                        self.mark_mine(cell)
+                else:
+                    new_knowledge.append(sentence)
+            self.knowledge = new_knowledge
+            self.infer_from_sentences()
 
-        # With this new knowledge we can make inferences of their subsets.
-        self.infer_from_sentences()
 
     def infer_from_sentences(self):
         # We go through all diferent sentences present on the knowledge base recursively 
