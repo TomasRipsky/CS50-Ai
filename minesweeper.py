@@ -212,6 +212,8 @@ class MinesweeperAI():
 
         # Add new sentence to the knowledge base if neighbors are valid and their count is not 0
         if neighbors and count > 0:
+            # Filter out any cells that are known to be mines or safes
+            new_sentence_cells = {n for n in neighbors if n not in self.mines and n not in self.safes}
             self.knowledge.append(Sentence(neighbors, count))
 
         # Step 4: Mark additional cells
@@ -248,6 +250,21 @@ class MinesweeperAI():
         self.knowledge = new_knowledge
         # With this new knowledge we can make inferences of their subsets.
         self.infer_from_sentences()
+
+        # Now we can infer additional safe cells and mines
+        for sentence in self.knowledge:
+            # Check if the count is 0 and the sentence has cells
+            if sentence.count == 0 and sentence.cells:
+                for cell in sentence.cells.copy():
+                    # Check if the cell is not already marked as safe
+                    if cell not in self.safes:
+                        self.mark_safe(cell)
+            # Check if the count is equal to the number of cells in the sentence
+            elif len(sentence.cells) == sentence.count and sentence.cells:
+                for cell in sentence.cells.copy():
+                    # Check if the cell is not already marked as a mine
+                    if cell not in self.mines:
+                        self.mark_mine(cell)
 
         # Step 6: Combine multiple sentences to draw conclusions
         self.combine_sentences()
