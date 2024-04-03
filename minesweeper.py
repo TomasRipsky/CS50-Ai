@@ -197,9 +197,10 @@ class MinesweeperAI():
         self.mark_safe(cell)
 
         # Step 3: Add new knowledge to the AI
-        i, j = cell
         new_knowledge = []
         neighbors = set()
+        i, j = cell
+        
         # Iterate over neighboring cells
         # We search in each row and column but taking into account the limits. -> Remember superior limit not included
         for x in range(max(0, i - 1), min(self.height, i + 2)):
@@ -208,12 +209,12 @@ class MinesweeperAI():
                 # Skip if the neighbor is the cell itself or already moved
                 if neighbor != cell and neighbor not in self.moves_made:
                     neighbors.add(neighbor)
+
         # Add new sentence to the knowledge base if neighbors are valid and their count is not 0
         if neighbors and count > 0:
             self.knowledge.append(Sentence(neighbors, count))
 
         # Step 4: Mark additional cells
-        # We go through all the sentences in our knowledge base
         for sentence in self.knowledge:
             known_mines = sentence.known_mines()
             known_safes = sentence.known_safes()
@@ -226,7 +227,6 @@ class MinesweeperAI():
                 self.safes |= known_safes
 
         # Step 5: Infer new knowledge
-        # We go through each sentence in our agent knowledge
         new_knowledge = []
         for sentence in self.knowledge:
             if not sentence.cells:
@@ -234,13 +234,13 @@ class MinesweeperAI():
             # If our sentence count is 0 it means that all the cells in that sentence are safe
             # So we mark them as safe
             if sentence.count == 0:
-                for cell in sentence.cells.copy():
-                    self.mark_safe(cell)
+                for safe_cell in sentence.cells.copy():
+                    self.mark_safe(safe_cell)
             # If not but the amount of cells is equal to the count then we know that all of them are mines
             # So we mark them as mine
             elif len(sentence.cells) == sentence.count:
-                for cell in sentence.cells.copy():
-                    self.mark_mine(cell)
+                for mine_cell in sentence.cells.copy():
+                    self.mark_mine(mine_cell)
             # If neither inference can be made we store the sentence as it is
             else:
                 new_knowledge.append(sentence)
@@ -288,25 +288,37 @@ class MinesweeperAI():
         This process continues recursively until no new sentences
         can be inferred.
         """
+        # Flag to indicate if any new sentences were added
         combined = True
+        
+        # Iterate until no new sentences are added
         while combined:
             combined = False
-            for sentence1 in self.knowledge:
-                for sentence2 in self.knowledge:
-                    if sentence1 == sentence2:
+            
+            # Iterate over each pair of sentences in the knowledge base
+            for i, sentence1 in enumerate(self.knowledge):
+                for j, sentence2 in enumerate(self.knowledge):
+                    # Skip if the same sentence or if one is subset of the other
+                    if i == j or sentence1.cells.issubset(sentence2.cells):
                         continue
-                    # Check if sentence1 is a subset of sentence2
-                    if sentence1.cells.issubset(sentence2.cells):
-                        # If so, infer new sentence
-                        new_sentence_cells = sentence2.cells - sentence1.cells
-                        new_sentence_count = sentence2.count - sentence1.count
+
+                    # Check if sentence2 is a subset of sentence1
+                    if sentence2.cells.issubset(sentence1.cells):
+                        # Infer new sentence representing the difference
+                        new_sentence_cells = sentence1.cells - sentence2.cells
+                        new_sentence_count = sentence1.count - sentence2.count
                         new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+
                         # Check if the new sentence is not already in knowledge base
                         if new_sentence not in self.knowledge:
                             # Add new sentence and set combined to True
                             self.knowledge.append(new_sentence)
                             combined = True
+
+                            # Break the inner loop as a new sentence is added
                             break
+
+                # Break the outer loop if a new sentence is added
                 if combined:
                     break
 
@@ -319,10 +331,18 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        # Check if there are any safe moves available
+        if not self.safes:
+            return None
+        
+        # Iterate through the set of safe cells and return the first one that has not been chosen
         for cell in self.safes:
             if cell not in self.moves_made:
                 return cell
+        
+        # If all safe cells have been chosen, return None
         return None
+
 
     def make_random_move(self):
         """
@@ -331,14 +351,23 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        # We strore  all available moves in a list called 'possible moves'
+        # Create a list to store possible moves
         possible_moves = []
+
+        # Iterate through all cells on the board
         for i in range(self.height):
             for j in range(self.width):
                 cell = (i, j)
+                # Check if the cell is not already chosen and not a mine
                 if cell not in self.moves_made and cell not in self.mines:
+                    # Add the cell to the list of possible moves
                     possible_moves.append(cell)
+
+        # Check if there are any possible moves available
         if possible_moves:
-            # We get a random selection of the list of possible moves
+            # Choose a random move from the list of possible moves
             return random.choice(possible_moves)
-        return None
+        else:
+            # If no possible moves are available, return None
+            return None
+
