@@ -348,16 +348,9 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        # Check if there are any safe moves available
-        if not self.safes:
-            return None
-        
-        # Iterate through the set of safe cells and return the first one that has not been chosen
-        for cell in self.safes:
-            if cell not in self.moves_made:
-                return cell
-        
-        # If all safe cells have been chosen, return None
+        Possible_safe_movements = self.safes - self.moves_made
+        if Possible_safe_movements:
+            return random.choice(tuple(Possible_safe_movements))
         return None
 
 
