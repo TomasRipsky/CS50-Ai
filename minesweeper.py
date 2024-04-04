@@ -218,51 +218,50 @@ class MinesweeperAI():
                     if (x, y) != cell:
                         neighbors.add((x, y))
 
+
             # Add new sentence to the knowledge base if neighbors are valid and their count is not 0
             if neighbors and count > 0:
                 self.knowledge.append(Sentence(neighbors, count))
+                # We have created new knowledge that we will have to go through and analyze
+                knowledge_added = True
 
             # Step 4: Mark additional cells
-            for sentence in self.knowledge:
-                known_safes = sentence.known_safes()
-                if known_safes:
-                    for cell in known_safes.copy():
-                        self.mark_safe(cell)
-                known_mines = sentence.known_mines()
-                if known_mines:
-                    for cell in known_mines.copy():
-                        self.mark_mine(cell)
-            
-            # Remove any empty sentences from knowledge base:
-            empty = Sentence(set(), 0)
-            self.knowledge[:] = [x for x in self.knowledge if x != empty]
+            while knowledge_added:
+                knowledge_added = False
+                for sentence in self.knowledge:
+                    known_safes = sentence.known_safes()
+                    if known_safes:
+                        for cell in known_safes.copy():
+                            self.mark_safe(cell)
+                    known_mines = sentence.known_mines()
+                    if known_mines:
+                        for cell in known_mines.copy():
+                            self.mark_mine(cell)
+                
+                # Remove any empty sentences from knowledge base:
+                empty = Sentence(set(), 0)
+                self.knowledge[:] = [x for x in self.knowledge if x != empty]
 
-            # Step 5: Infer new knowledge
-            self.infer_from_sentences()
-
-
-    def infer_from_sentences(self):
-        # We go through all diferent sentences present on the knowledge base recursively 
-        new_sentences_added = 0
-        for sentence1 in self.knowledge:
-            for sentence2 in self.knowledge:
-                if sentence1 == sentence2:
-                    continue
-                # We check if the sentence 1 is a subset of the sentence 2
-                if sentence1.cells.issubset(sentence2.cells):
-                    # If it is we apply the formula set2 - set1 = count2 - count1
-                    new_sentence_cells = sentence2.cells - sentence1.cells
-                    new_sentence_count = sentence2.count - sentence1.count
-                    # Now we create the new infered sentence
-                    new_sentence = Sentence(new_sentence_cells, new_sentence_count)
-                    # We check if our new inference is not in the knowledge base
-                    if new_sentence not in self.knowledge:
-                        # If it is not we add it
-                        self.knowledge.append(new_sentence)
-                        new_sentences_added += 1
-        # We recursively call the function again if we added a new sentence
-        if new_sentences_added > 0:
-            self.infer_from_sentences()
+                # Step 5: Infer new knowledge
+                # We go through all diferent sentences present on the knowledge base 
+                new_sentences_added = 0
+                for sentence1 in self.knowledge:
+                    for sentence2 in self.knowledge:
+                        if sentence1 == sentence2:
+                            continue
+                        # We check if the sentence 1 is a subset of the sentence 2
+                        if sentence1.cells.issubset(sentence2.cells):
+                            # If it is we apply the formula set2 - set1 = count2 - count1
+                            new_sentence_cells = sentence2.cells - sentence1.cells
+                            new_sentence_count = sentence2.count - sentence1.count
+                            # Now we create the new infered sentence
+                            new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+                            # We check if our new inference is not in the knowledge base
+                            if new_sentence not in self.knowledge:
+                                # If it is not we add it
+                                self.knowledge.append(new_sentence)
+                                # As new knowledge was added we will need to analyze it again
+                                knowledge_added = True
 
 
     def make_safe_move(self):
