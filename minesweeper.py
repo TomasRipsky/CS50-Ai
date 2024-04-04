@@ -257,19 +257,22 @@ class MinesweeperAI():
         for sentence1 in self.knowledge:
             for sentence2 in self.knowledge:
                 if sentence1 == sentence2:
-                    continue
+                    self.knowledge.remove(sentence2)
                 # We check if the sentence 1 is a subset of the sentence 2
                 if sentence1.cells.issubset(sentence2.cells):
                     # If it is we apply the formula set2 - set1 = count2 - count1
                     new_sentence_cells = sentence2.cells - sentence1.cells
                     new_sentence_count = sentence2.count - sentence1.count
-                    # Now we create the new infered sentence
-                    new_sentence = Sentence(new_sentence_cells, new_sentence_count)
-                    # We check if our new inference is not in the knowledge base
-                    if new_sentence not in self.knowledge and new_sentence not in self.safes and new_sentence not in self.mines:
-                        # If it is not we add it
-                        self.knowledge.append(new_sentence)
-                        new_sentences_added += 1
+                    # Check that all cells in the new sentence are neither known mines nor known safes
+                    valid_sentence = [cell for cell in new_sentence_cells if cell not in self.mines and cell not in self.safes]
+                    if valid_sentence:
+                        # Now we create the new inferred sentence
+                        new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+                        # We check if our new inference is not in the knowledge base
+                        if new_sentence not in self.knowledge:
+                            # If it is not we add it
+                            self.knowledge.append(new_sentence)
+                            new_sentences_added += 1
         # We recursively call the function again if we added a new sentence
         if new_sentences_added > 0:
             self.infer_from_sentences()
