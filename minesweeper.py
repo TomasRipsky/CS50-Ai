@@ -222,8 +222,9 @@ class MinesweeperAI():
             # Add new sentence to the knowledge base if neighbors are valid and their count is not 0
             if neighbors and count > 0:
                 self.knowledge.append(Sentence(neighbors, count))
-                # We have created new knowledge that we will have to go through and analyze
-                knowledge_added = True
+            
+            # We have created new knowledge that we will have to go through and analyze
+            knowledge_added = True
 
             # Step 4: Mark additional cells
             while knowledge_added:
