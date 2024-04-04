@@ -234,10 +234,12 @@ class MinesweeperAI():
                     if known_safes:
                         for cell in known_safes.copy():
                             self.mark_safe(cell)
+                            knowledge_added = True
                     known_mines = sentence.known_mines()
                     if known_mines:
                         for cell in known_mines.copy():
                             self.mark_mine(cell)
+                            knowledge_added = True
                 
                 # Remove any empty sentences from knowledge base:
                 empty = Sentence(set(), 0)
