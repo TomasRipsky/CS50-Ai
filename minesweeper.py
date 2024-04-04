@@ -229,17 +229,24 @@ class MinesweeperAI():
             # Step 4: Mark additional cells
             while knowledge_added:
                 knowledge_added = False
+                safes = set()
+                mines = set()
+
+                # Gather the known safes and mines from all the sentences in our KB
                 for sentence in self.knowledge:
-                    known_safes = sentence.known_safes()
-                    if known_safes:
-                        for cell in known_safes.copy():
-                            self.mark_safe(cell)
-                            knowledge_added = True
-                    known_mines = sentence.known_mines()
-                    if known_mines:
-                        for cell in known_mines.copy():
-                            self.mark_mine(cell)
-                            knowledge_added = True
+                    safes = safes.union(sentence.known_safes())
+                    mines = mines.union(sentence.known_mines())
+
+                # Mark all the safes including the new ones as safe:
+                if safes:
+                    knowledge_changed = True
+                    for safe in safes:
+                        self.mark_safe(safe)
+                # Same proceedure but with mines
+                if mines:
+                    knowledge_changed = True
+                    for mine in mines:
+                        self.mark_mine(mine)
                 
                 # Remove any empty sentences from knowledge base:
                 empty = Sentence(set(), 0)
