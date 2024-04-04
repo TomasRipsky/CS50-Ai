@@ -225,12 +225,13 @@ class MinesweeperAI():
             
             # We have created new knowledge that we will have to go through and analyze
             knowledge_added = True
+            safes = set()
+            mines = set()
 
             # Step 4: Mark additional cells
             while knowledge_added:
                 knowledge_added = False
-                safes = set()
-                mines = set()
+
 
                 # Gather the known safes and mines from all the sentences in our KB
                 for sentence in self.knowledge:
@@ -254,7 +255,6 @@ class MinesweeperAI():
 
                 # Step 5: Infer new knowledge
                 # We go through all diferent sentences present on the knowledge base 
-                new_sentences_added = 0
                 for sentence1 in self.knowledge:
                     for sentence2 in self.knowledge:
                         if sentence1 == sentence2:
