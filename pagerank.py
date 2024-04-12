@@ -137,7 +137,8 @@ def iterate_pagerank(corpus, damping_factor):
     """
     # Initialize PageRank values for each page
     # Each page will have an initial value of 1/ Number of pages
-    pageranks = {page: 1 / len(corpus) for page in corpus}
+    num_pages = len(corpus)
+    pageranks = {page: 1 / num_pages for page in corpus}
     
     # Iterate until convergence
     while True:
