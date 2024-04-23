@@ -141,8 +141,6 @@ class CrosswordCreator():
 
         return revised
 
-
-
     def ac3(self, arcs=None):
         """
         Update `self.domains` such that each variable is arc consistent.
@@ -228,17 +226,33 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        # Function to count the amount of values eliminated 
-        def count_eliminated_values(value):
-            count = 0
+        # Create a dictionary to count the number of ruled-out values for each value in the domain
+        ruled_out_counts = {value: 0 for value in self.domains[var]}
+
+        # Iterate over each value in the domain of `var`
+        for value in self.domains[var]:
+            # Iterate over each neighbor of `var`
             for neighbor in self.crossword.neighbors(var):
-                if neighbor not in assignment and value in self.domains[neighbor]:
-                    count += 1
-            return count
+                # Skip if the neighbor is already assigned
+                if neighbor in assignment:
+                    continue
 
-        # Ordenar los valores del dominio de la variable según el número de valores eliminados para los vecinos no asignados
-        return sorted(self.domains[var], key=count_eliminated_values)
+                # Get the overlap between `var` and `neighbor`
+                overlap = self.crossword.overlaps.get((var, neighbor), None)
+                if overlap is None:
+                    continue
 
+                i, j = overlap  # Indices of overlap in `var` and `neighbor`
+
+                # Check if `value` conflicts with any value in the domain of `neighbor`
+                for value_neighbor in self.domains[neighbor]:
+                    if value[i] != value_neighbor[j]:
+                        ruled_out_counts[value] += 1
+
+        # Sort the domain values of `var` based on the number of ruled-out values
+        sorted_values = sorted(self.domains[var], key=lambda value: ruled_out_counts[value])
+
+        return sorted_values
 
     def select_unassigned_variable(self, assignment):
         """
