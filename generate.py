@@ -117,31 +117,30 @@ class CrosswordCreator():
         """
         Make variable `x` arc consistent with variable `y`.
         To do so, remove values from `self.domains[x]` for which there is no
-        possible corresponding value for `y` in `self.domains[y]`.
+        possible corresponding value in the domain of `y`.
 
         Return True if a revision was made to the domain of `x`; return
         False if no revision was made.
         """
-        revised = False
-        # We check if there is overlaping between the variables(Words)
-        overlap = self.crossword.overlaps[x, y]
-        if overlap is not None:
-            # If there is any overlap we want the position of it
-            i, j = overlap
-            new_domain_x = set()
-            # We check the domain of X (Possible values of X)
-            for value_x in self.domains[x]:
-                # We want the possible values of X and the possible values of Y
-                # that have the same letter in the position of overlap i,j 
-                if any(value_y[i] == value_x[j] for value_y in self.domains[y]):
-                    # We store them in a new domain
-                    new_domain_x.add(value_x)
-                else:
-                    revised = True
-            if revised:
-                # If there was any change we update the domain of X
-                self.domains[x] = new_domain_x
+        revised = False  # Flag to track if a revision was made
+
+        # Get the overlap between variables x and y
+        overlap = self.crossword.overlaps.get((x, y), None)
+        if overlap is None:
+            return False  # No overlap, so nothing to revise
+
+        i, j = overlap  # Indices of overlap in variables x and y
+
+        # Iterate over values in the domain of variable x
+        for value_x in self.domains[x].copy():
+            consistent = any(value_x[i] == value_y[j] for value_y in self.domains[y])
+
+            if not consistent:
+                self.domains[x].remove(value_x)  # Remove inconsistent value
+                revised = True  # Flag that a revision was made
+
         return revised
+
 
 
     def ac3(self, arcs=None):
