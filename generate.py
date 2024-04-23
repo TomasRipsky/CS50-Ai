@@ -132,6 +132,9 @@ class CrosswordCreator():
         i, j = overlap  # Indices of overlap in variables x and y
 
         # Iterate over values in the domain of variable x
+        # For each value_x, it is checked if there is at least one value_y in the domain of y 
+        # such that the letter in the overlapping position between x and y, is the same as the corresponding letter in value_x.
+        # Simplifying it --> we check if the letters in the overlapping position are the same
         for value_x in self.domains[x].copy():
             consistent = any(value_x[i] == value_y[j] for value_y in self.domains[y])
 
