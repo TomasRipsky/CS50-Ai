@@ -92,22 +92,14 @@ def np_chunk(tree):
     """
     np_chunks = []
 
-    def contains_np(tree):
-        """
-        Helper function to check if a tree contains any NP subtrees.
-        """
-        if tree.label() == 'NP':
-            return True
-        for child in tree:
-            if isinstance(child, nltk.Tree) and contains_np(child):
-                return True
-        return False
-
+    # Iterate over all subtrees in the tree with label 'NP'
     for subtree in tree.subtrees(lambda t: t.label() == 'NP'):
-        if not contains_np(subtree):
+        # Check if this subtree contains any nested 'NP'
+        if not any(child.label() == 'NP' for child in subtree):
             np_chunks.append(subtree)
 
     return np_chunks
+
 
 if __name__ == "__main__":
     main()
