@@ -6,4 +6,6 @@ This repository contains projects, exercises, and any additional materials relat
 
 **This is Project 1 - Knights**
 
+*The idea behind the project is to: Write a program to solve logic puzzles. Specifically “Knights and Knaves” puzzles.*
+
 **Thank you for visiting! 🚀**
