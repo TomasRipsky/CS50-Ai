@@ -6,4 +6,6 @@ This repository contains projects, exercises, and any additional materials relat
 
 **This is Project 0 - Tic Tac Toe ---> To play it ---> python runner.py**
 
+*The idea behind the project is: using Minimax, implement an AI to play Tic-Tac-Toe optimally.*
+
 **Thank you for visiting! 🚀**
