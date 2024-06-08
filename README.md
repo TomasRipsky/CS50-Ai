@@ -6,4 +6,10 @@ This repository contains projects, exercises, and any additional materials relat
 
 **This is Project 3 - Crossword**
 
+*The idea behind this project is to Write an AI to generate crossword puzzles.*
+
+Example:
+
+![image](https://github.com/TomasRipsky/CS50-Ai/assets/119610269/fe63b77a-795d-403f-a4fc-5e8bc49e9b24)
+
 **Thank you for visiting! 🚀**
