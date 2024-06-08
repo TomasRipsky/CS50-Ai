@@ -6,4 +6,15 @@ This repository contains projects, exercises, and any additional materials relat
 
 **This is Project 4 - Shopping**
 
+*The idea behind this project is to write an AI to predict whether online shopping customers will complete a purchase.*
+
+Example:
+    $ python shopping.py shopping.csv
+    
+    Correct: 4088
+    Incorrect: 844
+    True Positive Rate: 41.02%
+    True Negative Rate: 90.55%
+  
+
 **Thank you for visiting! 🚀**
